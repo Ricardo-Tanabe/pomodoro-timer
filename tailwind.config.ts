@@ -8,6 +8,14 @@ export default {
   ],
   theme: {
     extend: {
+      height: {
+        '128': '32rem',
+        '144': '36rem',
+      },
+      width: {
+        '128': '32rem',
+        '144': '36rem',
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
