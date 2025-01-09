@@ -1,7 +1,7 @@
 export type StateName = 'focus' | 'short' | 'long';
 
 export interface StateProps {
-    state: string;
+    state: StateName;
     onSetState: (nameState: StateName) => void;
 }
 
@@ -15,7 +15,12 @@ export interface StateButtonProps {
 export interface TimerProps {
     time: number;
     control: string;
+    isPaused: boolean;
     onSetTime: () => void;
+}
+
+export interface ProgressBarProps {
+    percent: number;
 }
 
 export interface ExtendTimerValueButtonProps {
@@ -26,6 +31,7 @@ export interface ExtendTimerValueButtonProps {
 
 export interface ControlProps {
     control: string;
+    isPaused: boolean;
     onSetControl: (nameControl: string) => void;
 }
 

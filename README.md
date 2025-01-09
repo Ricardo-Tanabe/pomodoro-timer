@@ -21,7 +21,7 @@ Link para o [Projeto Pomodoro Timer](https://roadmap.sh/projects/pomodoro-timer)
 
 - HTML
 - [Tailwind CSS](https://tailwindcss.com/): Framework
-- JavaScript
+- [Typescript](https://www.typescriptlang.org/)
 - [React](https://react.dev/)
     - Framework: [Nextjs](https://nextjs.org/)
     - Servidor: [Descrito abaixo](#getting-started)
