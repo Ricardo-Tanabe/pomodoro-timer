@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StateName,
+import { TimeState,
+         StateName,
          DefaultTimes,
          StateProps,
          StateButtonProps,
@@ -30,7 +31,7 @@ function StateButton( { name, isSelected, text, onSelectionChange }: StateButton
 function ExtendTimerValueButton({ value, text, onSetExtraTime }: ExtendTimerValueButtonProps) {
     
     const handleClick = () => {
-        onSetExtraTime(value * 60);
+        onSetExtraTime(value);
     }
 
 
@@ -78,17 +79,17 @@ function State({state, onSetState}: StateProps) {
     );
 }
 
-function Timer({ time, control, isPaused, onSetTime }: TimerProps) {
+function Timer({ time, extraTime, control, isPaused, onSetTime }: TimerProps) {
 
     useEffect(() => {
         if(control === 'on' || (control === 'pause' && !isPaused)) {
             const timer = setInterval(() => {
-                onSetTime();
+                onSetTime(extraTime);
             }, 1000);
 
             return () => clearInterval(timer);
         }
-    }, [isPaused, control, onSetTime]);
+    }, [extraTime, isPaused, control, onSetTime]);
 
     const formatTime = (seconds: number) => {
         const convertHours = 3600
@@ -145,9 +146,12 @@ function Control({ control, isPaused, onSetControl }: ControlProps) {
 function PomodoroTimer() {
     const convertMinutes = 60;
     const [state, setState] = useState<StateName>('focus');
-    const [time, setTime] = useState<number>(25 * convertMinutes);
-    const [timeBasedInState, setTimeBasedInState] = useState<number>(25);
-    const [percent, setPercent] = useState<number>(0);
+    const [timeState, setTimeState] = useState<TimeState>({
+        time: 25 * convertMinutes,
+        timeBasedInState: 25 * convertMinutes,
+        percent: 0,
+        extraTime: 0,
+    });
     const [control, setControl] = useState<string>('off');
     const [isPaused, setIsPaused] = useState<boolean>(false);
     const defaultTimes: DefaultTimes = {
@@ -156,31 +160,43 @@ function PomodoroTimer() {
         long: 15 * convertMinutes
     }
 
+    const calculatePercent = (remainingTime: number, totalTime: number): number => {
+        return Math.floor(100 - (remainingTime/(totalTime))*100);
+    }
+
     const handleState = (nameState: StateName) => {
         setState(nameState);
-        setTime(defaultTimes[nameState]);
-        setTimeBasedInState(defaultTimes[nameState]);
-        setPercent(0);
+        setTimeState({
+            time: defaultTimes[nameState],
+            timeBasedInState: defaultTimes[nameState],
+            percent: 0,
+            extraTime: 0
+        })
         setControl('off');
         setIsPaused(false);
     }
 
-    const handleTimer = () => {
-        setTime(prevTime => {
-            const newTime = prevTime > 0 ? prevTime - 1 : 0;
-            setPercent(Math.floor(100 - (newTime/timeBasedInState)*100));
-            return newTime;
+    const handleTimer = (extraValue: number) => {
+        setTimeState(prevState => {
+            const subTime = prevState.time > 0 ? prevState.time - 1 : 0;
+            const newTime = subTime + extraValue;
+            const newTimeBased = prevState.timeBasedInState + extraValue;
+            const newPercent = calculatePercent(newTime, newTimeBased);
+
+            return {
+                time: newTime,
+                timeBasedInState: newTimeBased,
+                percent: newPercent,
+                extraTime: 0
+            };
         });
-        
     }
 
-    const handleExtraTime = (extraValue: number) => {
-        setTime(prevTime => {
-            const newTime = prevTime + extraValue;
-            setPercent(Math.floor(100 - (newTime/(timeBasedInState))*100));
-            return newTime;
-        });
-        setTimeBasedInState(prevTimeBased => prevTimeBased + extraValue);
+    const handleExtraTime = (value: number) => {
+        setTimeState(prevState => ({
+            ...prevState,
+            extraTime: (value * convertMinutes),
+        }));
     }
 
     const handleControl = (nameControl: string) => {
@@ -195,8 +211,8 @@ function PomodoroTimer() {
     return (
         <>
         <State state={state} onSetState = {handleState}/>
-        <Timer time={time} control={control} isPaused={isPaused} onSetTime = {handleTimer}/>
-        <ProgressBar percent={percent}/>
+        <Timer time={timeState.time} extraTime={timeState.extraTime} control={control} isPaused={isPaused} onSetTime = {handleTimer}/>
+        <ProgressBar percent={timeState.percent}/>
         <ExtendTimerValue onSetExtraTime = {handleExtraTime}/>
         <Control control={control} isPaused={isPaused} onSetControl={handleControl}/>
         </>
