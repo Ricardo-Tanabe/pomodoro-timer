@@ -197,6 +197,7 @@ function PomodoroTimer() {
             ...prevState,
             extraTime: (value * convertMinutes),
         }));
+        setControl('on');
     }
 
     const handleControl = (nameControl: string) => {
@@ -211,7 +212,8 @@ function PomodoroTimer() {
     return (
         <>
         <State state={state} onSetState = {handleState}/>
-        <Timer time={timeState.time} extraTime={timeState.extraTime} control={control} isPaused={isPaused} onSetTime = {handleTimer}/>
+        <Timer time={timeState.time} extraTime={timeState.extraTime}
+            control={control} isPaused={isPaused} onSetTime = {handleTimer}/>
         <ProgressBar percent={timeState.percent}/>
         <ExtendTimerValue onSetExtraTime = {handleExtraTime}/>
         <Control control={control} isPaused={isPaused} onSetControl={handleControl}/>

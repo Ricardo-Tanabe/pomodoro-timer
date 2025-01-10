@@ -1,3 +1,6 @@
+import React, { Dispatch, JSX, SetStateAction } from 'react'
+import { IconType } from 'react-icons';
+
 export type StateName = 'focus' | 'short' | 'long';
 
 export interface TimeState {
@@ -54,4 +57,16 @@ export interface DefaultTimes {
     focus: number,
     short: number,
     long: number
+}
+
+export interface ShowTasksProps {
+    items: string[],
+    addTask: boolean,
+    setAddTask: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface ShowTasksButtonProps {
+    icon?: IconType;
+    option: string;
+    onClick?: () => void;
 }

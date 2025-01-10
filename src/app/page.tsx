@@ -1,13 +1,7 @@
 'use client'
 
-import React, { useState } from 'react';
-import PomodoroTimer from './pomodoro_timer'
-
-function Tasks() {
-  return (
-    <></>
-  );
-}
+import PomodoroTimer from './pomodoro_timer';
+import Tasks from './tasks';
 
 export default function Page() {
   return (
