@@ -1,4 +1,4 @@
-import React, { Dispatch, JSX, SetStateAction } from 'react'
+import React, { Dispatch, JSX, RefObject, SetStateAction } from 'react'
 import { IconType } from 'react-icons';
 
 export type StateName = 'focus' | 'short' | 'long';
@@ -59,10 +59,23 @@ export interface DefaultTimes {
     long: number
 }
 
-export interface ShowTasksProps {
-    items: string[],
+export interface TaskProps {
+    taskName: string,
+    taskKey: number,
+    onClickEdit: (index: number) => void,
+    onClickRemove: (index: number) => void
+}
+
+export interface ShowAddNewTasksProps {
+    content: JSX.Element[],
     addTask: boolean,
     setAddTask: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface UserTaskInputProps {
+    addTask: boolean
+    onClickAdd: (inputRef: string) => void,
+    onClickCancel: () => void,
 }
 
 export interface ShowTasksButtonProps {
