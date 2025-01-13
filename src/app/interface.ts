@@ -74,7 +74,7 @@ export interface ShowAddNewTasksProps {
 
 export interface UserTaskInputProps {
     addTask: boolean
-    onClickAdd: (inputRef: string) => void,
+    onClickAdd: (inputRef: string, isLastChild: boolean) => void,
     onClickCancel: () => void,
 }
 
