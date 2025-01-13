@@ -46,6 +46,10 @@ export interface ControlProps {
     onSetControl: (nameControl: string) => void;
 }
 
+export interface CompletedSessionsProps {
+    sessionsCount: number;
+}
+
 export interface ControlButtonProps {
     name: string;
     text: string;
