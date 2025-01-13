@@ -1,4 +1,5 @@
 import React, { JSX, useState, useRef, useEffect } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { IoMdCheckboxOutline } from 'react-icons/io';
 import { MdKeyboardReturn, MdOutlineKeyboardBackspace } from 'react-icons/md';
 import { CiPlay1 } from "react-icons/ci";
@@ -104,8 +105,13 @@ function UserTaskInput( data: UserTaskInputProps ) {
 
     function addInput() {
         if(inputRef.current) {
-            data.onClickAdd(inputRef.current.value);
-            inputRef.current.value = '';
+            const inputElement = inputRef.current;
+            const parentElement = inputElement.parentElement
+            if(parentElement && parentElement.parentNode) {
+                const isLastChild = parentElement === parentElement.parentNode.lastElementChild;
+                data.onClickAdd(inputElement.value, isLastChild);
+                inputRef.current.value = '';
+            }
         }
     }
 
@@ -166,30 +172,32 @@ function Tasks() {
     const [editContent, setEditContent] = useState<JSX.Element>(<></>);
 
     const addItem = (newTask: string) => {
+        const newId = uuidv4();
         const newTaskContent = <Task
-                                    key={content.length}
-                                    taskKey={content.length}
-                                    taskName={newTask}
-                                    onClickEdit={onClickEdit}
-                                    onClickRemove={removeItem} />
+                key={newId}
+                taskKey={content.length}
+                taskName={newTask}
+                onClickEdit={onClickEdit}
+                onClickRemove={removeItem} />
         setContent((prevContent) => [...prevContent, newTaskContent]);
     }
 
     const editItem = (newTask: string) => {
         setAddTask(false);
-        setContent((prevContent) => {
-            const newContent = prevContent.map(item => {
-                if(item.type !== Task) {
-                    return (
-                        editContent
-                    );
-                }
-                return item;
-            })
-            setEditContent(<></>);
-            return newContent.map((item, newIndex) => (
-                React.cloneElement(item, {key: newIndex})
-            ));
+        setEditContent(prevEditContent => {
+            setContent((prevContent) => {
+                const newContent = prevContent.map(item => {
+                    if(item.type !== Task) {
+                        const newElement = React.cloneElement(prevEditContent, { taskName: newTask, taskKey: prevEditContent.props.taskKey });
+                        return newElement;
+                    }
+                    return item;
+                })
+                return newContent.map((item, newIndex) => (
+                    React.cloneElement(item, {taskKey: newIndex})
+                ));
+            });
+            return <></>;
         });
     }
 
@@ -197,35 +205,41 @@ function Tasks() {
         setContent(prevContent => {
             const newContent = prevContent.filter((_, i) => i !== index)
             return newContent.map((item, newIndex) => (
-                React.cloneElement(item, {key: newIndex, taskKey: newIndex})
+                React.cloneElement(item, {taskKey: newIndex})
             ));
         });
     }
 
     function onClickCancel() {
         setAddTask(false);
-        setContent((prevContent) => {
-            const newContent = prevContent.map(item => {
-                if(item.type !== Task) {
-                    return editContent;
-                }
-                return item;
-            })
-            newContent.map(item => console.log(item.props.taskName))
-            return newContent.map((item, newIndex) => (
-                React.cloneElement(item, {key: newIndex})
-            ));
+        setEditContent(prevEditContent => {
+            setContent(prevContent => {
+                const newContent = prevContent.map((item, index) => {
+                    if(item.type !== Task) {
+                        const newElement = React.cloneElement(prevEditContent, { taskKey: index });
+                        return newElement;
+                    }
+                    return item;
+                })
+                return newContent.map((item, newIndex) => 
+                    React.cloneElement(item, { taskKey: newIndex })
+                );
+            });
+            return <></>;
         });
-        setEditContent(<></>);
     }
 
     function onClickEdit(index: number) {
         setAddTask(true);
         setContent((prevContent) => {
             const newContent = prevContent.map(item => {
-                if(item.key && parseInt(item.key) === index) {
+                if(item.props.taskKey === index) {
+                    const newId = uuidv4();
+                    const newTaskContent = React.cloneElement(item, { taskKey: index });
+                    setEditContent(newTaskContent);
                     return (
                         <UserTaskInput
+                            key={newId}
                             addTask={addTask}
                             onClickAdd={onClickAdd}
                             onClickCancel={onClickCancel} />
@@ -233,18 +247,15 @@ function Tasks() {
                 }
                 return item;
             })
-            newContent.map(item => console.log(item.props.taskName))
-            return newContent.map((item, newIndex) => (
-                React.cloneElement(item, {key: newIndex})
-            ));
+            return newContent;
         });
     }
 
-    function onClickAdd(userInput: string) {
+    function onClickAdd(userInput: string, isLastChild: boolean) {
         const validInput = userInput.length > 0
-        const isEdition = (editContent.key);
+        console.log(isLastChild)
         if(validInput) {
-            if (!isEdition) {
+            if (isLastChild) {
                 addItem(userInput);
             } else {
                 editItem(userInput);
@@ -256,12 +267,12 @@ function Tasks() {
         if(content.length > 0) {
             return (
                 <>
-                { content }               
+                { content }
+                <ShowAddNewTasks content={content} addTask={addTask} setAddTask={setAddTask}/>               
                 {(!editContent.key)
                     ? <UserTaskInput addTask={addTask} onClickAdd={onClickAdd} onClickCancel={onClickCancel} />
                     : <></>
                 }
-                <ShowAddNewTasks content={content} addTask={addTask} setAddTask={setAddTask}/>
                 </>
             );
         } else {
